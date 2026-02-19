@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evolv · CFO Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --page:#f3f4f6;--white:#ffffff;
+  --b50:#f9fafb;--b100:#f1f3f5;--b200:#e9eaed;--b300:#d0d5de;--b400:#9aa2b2;--b500:#6b7280;--b700:#374151;--b900:#111827;
+  --blue:#0047ff;--blue-lt:#eef2ff;--blue-md:#dce5ff;
+  --green:#059669;--green-lt:#ecfdf5;--green-md:#d1fae5;
+  --red:#dc2626;--red-lt:#fef2f2;--red-md:#fee2e2;
+  --amber:#d97706;--amber-lt:#fffbeb;--amber-md:#fde68a;
+  --ui:'Plus Jakarta Sans',sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+  --sb:220px;--chat:360px;--top:54px;
+}
+html{height:100%;font-family:var(--ui);-webkit-font-smoothing:antialiased;font-size:13px;color:var(--b900)}
+body{height:100svh;overflow:hidden;background:var(--page)}
+*{scrollbar-width:thin;scrollbar-color:var(--b200) transparent}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:var(--b300);border-radius:99px}
+
+/* ── LOGIN ─────────────────────────────── */
+#login-screen{
+  position:fixed;inset:0;z-index:999;
+  background:var(--white);
+  display:flex;align-items:center;justify-content:center;
+}
+.login-box{width:380px;padding:40px}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:32px}
+.login-logo-mark{width:36px;height:36px;background:var(--blue);border-radius:9px;display:grid;place-items:center;font-size:15px;font-weight:800;color:#fff;letter-spacing:-.5px}
+.login-logo strong{font-size:20px;font-weight:800;letter-spacing:-.4px}
+.login-logo span{font-size:12px;color:var(--b400);font-weight:400}
+.login-title{font-size:22px;font-weight:700;letter-spacing:-.4px;margin-bottom:6px}
+.login-sub{font-size:13px;color:var(--b500);margin-bottom:28px;line-height:1.5}
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:11.5px;font-weight:600;color:var(--b700);margin-bottom:6px;letter-spacing:.02em}
+.form-input{
+  width:100%;padding:9px 12px;border:1.5px solid var(--b200);border-radius:8px;
+  font-size:13px;font-family:var(--ui);color:var(--b900);background:var(--white);
+  transition:border-color .12s;outline:none;
+}
+.form-input:focus{border-color:var(--blue)}
+.form-hint{font-size:11px;color:var(--b400);margin-top:5px}
+.login-btn{
+  width:100%;padding:10px;background:var(--blue);color:#fff;
+  border:none;border-radius:8px;font-size:13px;font-weight:700;font-family:var(--ui);
+  cursor:pointer;margin-top:6px;transition:opacity .12s;letter-spacing:.01em;
+}
+.login-btn:hover{opacity:.88}
+.login-divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:var(--b400);font-size:11px}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:var(--b200)}
+.sso-btn{
+  width:100%;padding:9px;background:var(--b50);border:1.5px solid var(--b200);border-radius:8px;
+  font-size:12.5px;font-weight:600;font-family:var(--ui);color:var(--b700);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;transition:border-color .12s;
+}
+.sso-btn:hover{border-color:var(--b300);color:var(--b900)}
+.login-footer{text-align:center;font-size:11px;color:var(--b400);margin-top:24px}
+.login-footer a{color:var(--blue);text-decoration:none}
+.login-error{background:var(--red-lt);border:1px solid var(--red-md);color:var(--red);padding:9px 12px;border-radius:7px;font-size:12px;font-weight:500;margin-bottom:14px;display:none}
+
+/* ── APP SHELL ─────────────────────────── */
+#app{display:flex;height:100svh;overflow:hidden;opacity:0;transition:opacity .3s}
+#app.ready{opacity:1}
+
+/* ── SIDEBAR ───────────────────────────── */
+#sb{flex:0 0 var(--sb);width:var(--sb);min-width:0;height:100svh;background:var(--white);border-right:1px solid var(--b200);display:flex;flex-direction:column;overflow:hidden}
+.sb-top{padding:16px 14px 12px;border-bottom:1px solid var(--b100);flex-shrink:0}
+.logo{display:flex;align-items:center;gap:8px}
+.logo-mark{width:28px;height:28px;background:var(--blue);border-radius:7px;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;letter-spacing:-.5px}
+.logo-text strong{display:block;font-size:14px;font-weight:800;color:var(--b900);letter-spacing:-.3px;line-height:1.2}
+.logo-text span{font-size:9.5px;color:var(--b400);font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+.sb-nav{flex:1;overflow-y:auto;padding:8px 8px}
+.nav-grp-lbl{font-size:9.5px;font-weight:700;color:var(--b400);letter-spacing:.1em;text-transform:uppercase;padding:12px 8px 4px}
+.nl{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;color:var(--b500);font-size:12.5px;font-weight:500;transition:background .1s,color .1s;user-select:none;white-space:nowrap;overflow:hidden}
+.nl:hover{background:var(--b50);color:var(--b900)}
+.nl.on{background:var(--blue-lt);color:var(--blue);font-weight:600}
+.nl svg{width:14px;height:14px;flex-shrink:0;opacity:.7}
+.nl.on svg{opacity:1}
+.sb-foot{padding:10px 8px 12px;border-top:1px solid var(--b100);flex-shrink:0}
+.int-block{background:var(--b50);border-radius:7px;padding:9px 11px;margin-bottom:8px}
+.int-title{font-size:9.5px;font-weight:700;color:var(--b400);letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px}
+.int-item{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:500;color:var(--b500);margin-bottom:4px}
+.int-item:last-child{margin-bottom:0}
+.int-dot{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0;box-shadow:0 0 0 2px var(--green-lt)}
+.user-row{display:flex;align-items:center;gap:8px;padding:6px 7px;border-radius:7px;cursor:pointer;transition:background .1s}
+.user-row:hover{background:var(--b50)}
+.av{width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center;flex-shrink:0}
+.user-row strong{display:block;font-size:12px;font-weight:700;color:var(--b900);line-height:1.3}
+.user-row span{font-size:10.5px;color:var(--b400)}
+
+/* ── MAIN ──────────────────────────────── */
+#main{flex:1;min-width:0;height:100svh;display:flex;flex-direction:column;overflow:hidden}
+
+/* ── TOPBAR ────────────────────────────── */
+#topbar{height:var(--top);min-height:var(--top);background:var(--white);border-bottom:1px solid var(--b200);display:flex;align-items:center;padding:0 22px;gap:10px;flex-shrink:0}
+.tb-left{flex:1;min-width:0}
+.tb-title{font-size:14px;font-weight:700;color:var(--b900);letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-sub{font-size:11px;color:var(--b400);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-right{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.live-pill{display:flex;align-items:center;gap:5px;padding:4px 10px 4px 8px;border:1px solid var(--b200);border-radius:99px;font-size:11px;font-weight:500;color:var(--b500);background:var(--white)}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2.4s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.btn-ghost{display:flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid var(--b200);border-radius:6px;background:var(--white);color:var(--b500);font-size:12px;font-weight:500;font-family:var(--ui);cursor:pointer;transition:border-color .1s,color .1s;white-space:nowrap}
+.btn-ghost:hover{border-color:var(--b300);color:var(--b900)}
+.btn-blue{display:flex;align-items:center;gap:5px;padding:5px 14px;border:none;border-radius:6px;background:var(--blue);color:#fff;font-size:12px;font-weight:700;font-family:var(--ui);cursor:pointer;transition:opacity .1s;white-space:nowrap}
+.btn-blue:hover{opacity:.88}
+
+/* ── ALERT BANNER ──────────────────────── */
+.alert-bar{padding:9px 22px;display:flex;align-items:center;gap:10px;font-size:12px;border-bottom:1px solid;flex-shrink:0}
+.alert-bar.info{background:var(--blue-lt);border-color:var(--blue-md);color:#1e40af}
+.alert-bar.warn{background:var(--amber-lt);border-color:var(--amber-md);color:#92400e}
+.alert-bar.good{background:var(--green-lt);border-color:var(--green-md);color:#065f46}
+.alert-icon{font-size:14px;flex-shrink:0}
+.alert-text strong{font-weight:700}
+.alert-link{margin-left:auto;font-weight:600;cursor:pointer;text-decoration:underline;white-space:nowrap;flex-shrink:0}
+.alert-dismiss{margin-left:8px;cursor:pointer;opacity:.6;font-size:14px;flex-shrink:0}
+.alert-dismiss:hover{opacity:1}
+
+/* ── BODY ──────────────────────────────── */
+#body{flex:1;min-height:0;overflow-y:auto}
+.pg{display:none;padding:18px 22px 40px}
+.pg.on{display:block;animation:fu .15s ease}
+@keyframes fu{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── KPI STRIP ─────────────────────────── */
+.krow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.kcard{background:var(--white);border:1px solid var(--b200);border-radius:10px;padding:14px 15px;min-width:0;cursor:pointer;transition:border-color .12s,box-shadow .12s;position:relative}
+.kcard:hover{border-color:var(--b300);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.kcard.clickable::after{content:'→';position:absolute;bottom:12px;right:13px;font-size:11px;color:var(--b300);transition:color .12s,right .12s}
+.kcard.clickable:hover::after{color:var(--blue);right:10px}
+.klbl{font-size:10.5px;font-weight:600;color:var(--b400);letter-spacing:.03em;margin-bottom:4px;display:flex;align-items:center;gap:5px}
+.kval{font-family:var(--mono);font-size:24px;font-weight:600;color:var(--b900);letter-spacing:-.5px;line-height:1.1;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kfoot{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-height:18px}
+.knote{font-size:10.5px;color:var(--b400)}
+
+/* ── CHIPS ─────────────────────────────── */
+.chip{display:inline-flex;align-items:center;padding:1px 7px;border-radius:4px;font-size:10.5px;font-weight:700;font-family:var(--mono);white-space:nowrap;letter-spacing:.01em}
+.chip.up{background:var(--green-lt);color:var(--green)}
+.chip.dn{background:var(--red-lt);color:var(--red)}
+.chip.flat{background:var(--amber-lt);color:var(--amber)}
+.chip.blue{background:var(--blue-lt);color:var(--blue)}
+
+/* ── TOOLTIP ───────────────────────────── */
+.tip-wrap{position:relative;display:inline-flex;align-items:center}
+.tip-icon{width:12px;height:12px;border-radius:50%;background:var(--b200);color:var(--b500);font-size:8px;font-weight:700;display:grid;place-items:center;cursor:default;font-family:var(--ui)}
+.tip-box{
+  position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  background:var(--b900);color:#fff;font-size:11px;font-family:var(--ui);font-weight:400;line-height:1.55;
+  padding:8px 11px;border-radius:7px;width:220px;pointer-events:none;
+  opacity:0;transition:opacity .12s;z-index:200;white-space:normal;
+}
+.tip-box::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--b900)}
+.tip-wrap:hover .tip-box{opacity:1}
+
+/* ── CARDS ─────────────────────────────── */
+.card{background:var(--white);border:1px solid var(--b200);border-radius:10px;overflow:hidden;min-width:0}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:12px 15px 10px;border-bottom:1px solid var(--b100);gap:10px}
+.card-head-l{min-width:0}
+.ctitle{font-size:12.5px;font-weight:700;color:var(--b900);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.csub{font-size:11px;color:var(--b400);margin-top:1px}
+.card-body{padding:14px 15px}
+.clink{font-size:11.5px;font-weight:600;color:var(--blue);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:opacity .1s}
+.clink:hover{opacity:.75}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.mb10{margin-bottom:10px}
+.mb14{margin-bottom:14px}
+.cw{position:relative}
+canvas{display:block!important}
+
+/* ── KEY BOX ───────────────────────────── */
+.key-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:10px 15px;border-top:1px solid var(--b100);background:var(--b50)}
+.key-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--b500)}
+.key-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.key-sep{color:var(--b300);margin:0 4px}
+
+/* ── TABS ──────────────────────────────── */
+.tabs{display:flex;background:var(--b100);border-radius:6px;padding:2px;gap:1px}
+.tab{padding:4px 10px;border-radius:4px;font-size:11px;font-weight:500;color:var(--b400);cursor:pointer;border:none;background:transparent;font-family:var(--ui);transition:all .1s;white-space:nowrap}
+.tab:hover{color:var(--b700)}
+.tab.on{background:var(--white);color:var(--b900);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+
+/* ── STAT FOOT ─────────────────────────── */
+.sfoot{display:grid;grid-template-columns:repeat(4,1fr);padding:10px 15px;border-top:1px solid var(--b100)}
+.sc{padding-right:12px}
+.sc:not(:last-child){border-right:1px solid var(--b100);margin-right:12px}
+.slbl{font-size:9.5px;font-weight:700;color:var(--b400);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+.sval{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--b900)}
+
+/* ── EXP BARS ──────────────────────────── */
+.exlist{display:flex;flex-direction:column;gap:10px}
+.exmeta{display:flex;justify-content:space-between;margin-bottom:4px}
+.exname{font-size:12px;font-weight:500;color:var(--b700)}
+.examt{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--b900)}
+.barbg{height:4px;background:var(--b100);border-radius:99px;overflow:hidden}
+.barfg{height:100%;border-radius:99px;transition:width 1.1s cubic-bezier(.4,0,.2,1)}
+
+/* ── TABLE ─────────────────────────────── */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{text-align:left;font-size:10px;font-weight:700;color:var(--b400);letter-spacing:.08em;text-transform:uppercase;padding:0 13px 9px;border-bottom:1px solid var(--b200);white-space:nowrap}
+.tbl td{padding:9px 13px;font-size:12.5px;color:var(--b500);border-bottom:1px solid var(--b100)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--b50)}
+.tbl td.num{font-family:var(--mono);font-weight:500;color:var(--b900)}
+.tbl td.dk{font-weight:600;color:var(--b900)}
+.tbl td.link{color:var(--blue);cursor:pointer;font-weight:600}
+.tbl td.link:hover{text-decoration:underline}
+.tag{display:inline-block;padding:2px 7px;border-radius:4px;background:var(--b100);border:1px solid var(--b200);font-size:10.5px;font-weight:500;color:var(--b500)}
+
+/* ── METRIC GRID ───────────────────────── */
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+.mcard{background:var(--white);border:1px solid var(--b200);border-radius:10px;padding:14px 15px;min-width:0;cursor:pointer;transition:border-color .12s}
+.mcard:hover{border-color:var(--b300)}
+.mlbl{font-size:10.5px;font-weight:600;color:var(--b400);margin-bottom:4px;display:flex;align-items:center;gap:5px}
+.mval{font-family:var(--mono);font-size:26px;font-weight:600;color:var(--b900);letter-spacing:-.5px;line-height:1.1;margin-bottom:3px}
+.mspark{height:24px;display:flex;align-items:flex-end;gap:2px;margin:8px 0 7px}
+.spb{flex:1;border-radius:2px 2px 0 0;background:var(--blue-md);min-height:3px}
+.spb.hi{background:var(--blue)}
+.mbenchmark{font-size:10.5px;color:var(--b400);margin-top:4px;padding-top:7px;border-top:1px solid var(--b100)}
+.mbenchmark strong{color:var(--b700)}
+
+/* ── PL ROW ────────────────────────────── */
+.plrow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.plcard{background:var(--white);border:1px solid var(--b200);border-radius:10px;padding:13px 15px;min-width:0}
+.pllbl{font-size:10px;font-weight:700;color:var(--b400);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+.plval{font-family:var(--mono);font-size:22px;font-weight:600;color:var(--b900);letter-spacing:-.4px;margin-bottom:3px}
+.pldelta{font-size:11.5px;font-weight:600;color:var(--green)}
+.pldelta.neu{color:var(--b400)}
+
+/* ── INSIGHT CARDS ─────────────────────── */
+.insights{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.insight-card{background:var(--white);border:1px solid var(--b200);border-radius:10px;padding:14px 15px}
+.ins-label{font-size:9.5px;font-weight:700;color:var(--b400);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.ins-val{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--b900);margin-bottom:4px}
+.ins-desc{font-size:11.5px;color:var(--b500);line-height:1.55}
+
+/* ── SETTINGS ──────────────────────────── */
+.setrow{display:flex;justify-content:space-between;align-items:center;padding:11px 15px;border-bottom:1px solid var(--b100)}
+.setrow:last-child{border-bottom:none}
+.sname{font-size:13px;font-weight:700;color:var(--b900);margin-bottom:2px}
+.sdesc{font-size:11px;color:var(--b400)}
+
+/* ── CHAT ──────────────────────────────── */
+#chat{flex:0 0 0;width:0;min-width:0;height:100svh;background:var(--white);border-left:1px solid var(--b200);display:flex;flex-direction:column;overflow:hidden;transition:flex-basis .2s ease,width .2s ease}
+#chat.open{flex:0 0 var(--chat);width:var(--chat);min-width:var(--chat)}
+.chat-hd{height:var(--top);min-height:var(--top);border-bottom:1px solid var(--b200);padding:0 13px 0 15px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.chat-brand{display:flex;align-items:center;gap:9px}
+.chat-ico{width:28px;height:28px;background:var(--blue);border-radius:7px;display:grid;place-items:center;font-size:12px;color:#fff;flex-shrink:0}
+.chat-name{font-size:13px;font-weight:700;color:var(--b900);line-height:1.2}
+.chat-desc{font-size:10.5px;color:var(--b400)}
+.xbtn{width:26px;height:26px;border:none;background:none;color:var(--b400);cursor:pointer;font-size:16px;border-radius:4px;display:grid;place-items:center;transition:background .1s;flex-shrink:0}
+.xbtn:hover{background:var(--b100);color:var(--b900)}
+.chat-ctx{padding:8px 13px;border-bottom:1px solid var(--b100);background:var(--b50);font-size:11px;color:var(--b500);flex-shrink:0}
+.chat-ctx strong{color:var(--b900);font-weight:600}
+#msgs{flex:1;min-height:0;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:7px}
+.m{max-width:88%;padding:9px 12px;font-size:12.5px;line-height:1.58;border-radius:10px;animation:mi .14s ease}
+@keyframes mi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.m.ai{background:var(--b50);color:var(--b900);align-self:flex-start;border-radius:10px 10px 10px 2px;border:1px solid var(--b100)}
+.m.ai .m-sources{margin-top:7px;padding-top:7px;border-top:1px solid var(--b200);font-size:10.5px;color:var(--b400)}
+.m.ai .m-action{display:inline-flex;align-items:center;gap:4px;margin-top:8px;font-size:11.5px;font-weight:600;color:var(--blue);cursor:pointer}
+.m.ai .m-action:hover{opacity:.75}
+.m.usr{background:var(--blue);color:#fff;align-self:flex-end;border-radius:10px 10px 2px 10px}
+.typing-ind{display:flex;gap:3px;padding:10px 13px;background:var(--b50);border:1px solid var(--b100);border-radius:10px 10px 10px 2px;align-self:flex-start}
+.typing-ind span{width:5px;height:5px;background:var(--b300);border-radius:50%;animation:td 1.1s infinite}
+.typing-ind span:nth-child(2){animation-delay:.15s}
+.typing-ind span:nth-child(3){animation-delay:.3s}
+@keyframes td{0%,100%{opacity:.3;transform:scale(.9)}50%{opacity:1;transform:scale(1.1)}}
+.sugs{padding:4px 12px 8px;display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+.sug{padding:7px 11px;border:1px solid var(--b200);border-radius:6px;font-size:12px;color:var(--b500);cursor:pointer;background:var(--white);text-align:left;font-family:var(--ui);transition:border-color .1s,color .1s;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sug:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-lt)}
+.chat-ft{padding:10px 12px 12px;border-top:1px solid var(--b200);flex-shrink:0}
+.inpwrap{display:flex;align-items:center;gap:6px;background:var(--b50);border:1.5px solid var(--b200);border-radius:8px;padding:6px 6px 6px 11px;transition:border-color .1s}
+.inpwrap:focus-within{border-color:var(--blue);background:var(--white)}
+.cinp{flex:1;min-width:0;background:none;border:none;outline:none;font-size:12.5px;font-family:var(--ui);color:var(--b900)}
+.cinp::placeholder{color:var(--b300)}
+.sendbtn{width:28px;height:28px;background:var(--blue);border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:13px;display:grid;place-items:center;flex-shrink:0;transition:opacity .1s}
+.sendbtn:hover{opacity:.85}
+.chat-credit{text-align:center;font-size:10px;color:var(--b300);margin-top:5px}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-mark">ev</div>
+      <div>
+        <strong>Evolv</strong>
+        <span> · CFO Intelligence</span>
+      </div>
+    </div>
+    <div class="login-title">Sign in to your workspace</div>
+    <div class="login-sub">Real-time cash flow, burn rate, and KPI intelligence for growth-stage companies.</div>
+
+    <div class="login-error" id="login-err">Invalid credentials. Use demo@evolv.ai / Demo1234</div>
+
+    <div class="form-group">
+      <label class="form-label">Work email</label>
+      <input class="form-input" id="l-email" type="email" placeholder="jamie@yourcompany.com" value="demo@evolv.ai">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input class="form-input" id="l-pass" type="password" placeholder="••••••••" value="Demo1234">
+      <div class="form-hint">Demo credentials pre-filled · click Sign in</div>
+    </div>
+    <button class="login-btn" onclick="doLogin()">Sign in</button>
+
+    <div class="login-divider">or continue with</div>
+
+    <button class="sso-btn" onclick="doLogin()">
+      <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continue with Google
+    </button>
+
+    <div class="login-footer">Protected by MFA · AES-256 encrypted · <a href="#">Privacy Policy</a></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     APP
+══════════════════════════════════════ -->
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <aside id="sb">
+    <div class="sb-top">
+      <div class="logo">
+        <div class="logo-mark">ev</div>
+        <div class="logo-text">
+          <strong>Evolv</strong>
+          <span>CFO Platform</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sb-nav">
+      <div class="nav-grp-lbl">Workspace</div>
+      <div class="nl on" data-page="overview">
+        <svg viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" fill="currentColor"/><rect x="8" y="1" width="5" height="5" rx="1" fill="currentColor" opacity=".35"/><rect x="1" y="8" width="5" height="5" rx="1" fill="currentColor" opacity=".35"/><rect x="8" y="8" width="5" height="5" rx="1" fill="currentColor" opacity=".35"/></svg>
+        Overview
+      </div>
+      <div class="nl" data-page="cashflow">
+        <svg viewBox="0 0 14 14" fill="none"><path d="M1 10L4 6.5L7 8.5L10.5 3L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Cash Flow
+      </div>
+      <div class="nl" data-page="thirteen">
+        <svg viewBox="0 0 14 14" fill="none"><rect x="1" y="7" width="2" height="6" rx=".7" fill="currentColor" opacity=".35"/><rect x="4" y="4.5" width="2" height="8.5" rx=".7" fill="currentColor" opacity=".6"/><rect x="7" y="2.5" width="2" height="10.5" rx=".7" fill="currentColor"/><rect x="10" y="5.5" width="2" height="7.5" rx=".7" fill="currentColor" opacity=".45"/></svg>
+        13-Week Forecast
+      </div>
+      <div class="nl" data-page="expenses">
+        <svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M7 4.5v5M4.5 6.5h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Expenses
+      </div>
+      <div class="nl" data-page="kpis">
+        <svg viewBox="0 0 14 14" fill="none"><path d="M7 1.5L8.5 5.5L12.5 6L9.5 8.5L10.5 12.5L7 10.5L3.5 12.5L4.5 8.5L1.5 6L5.5 5.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        SaaS KPIs
+      </div>
+      <div class="nav-grp-lbl">Reports</div>
+      <div class="nl" data-page="board">
+        <svg viewBox="0 0 14 14" fill="none"><rect x="1.5" y="1.5" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M4 7l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Board Summary
+      </div>
+      <div class="nl" data-page="qbo">
+        <svg viewBox="0 0 14 14" fill="none"><rect x="2" y="1.5" width="10" height="11" rx="1.3" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 5h5M4.5 7h5M4.5 9h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        P&L / QBO
+      </div>
+      <div class="nl" data-page="settings">
+        <svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="1.8" stroke="currentColor" stroke-width="1.3"/><path d="M7 1.5v1.7M7 10.8v1.7M1.5 7h1.7M10.8 7h1.7M3 3l1.2 1.2M9.8 9.8L11 11M3 11l1.2-1.2M9.8 4.2L11 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Settings
+      </div>
+    </nav>
+
+    <div class="sb-foot">
+      <div class="int-block">
+        <div class="int-title">Integrations</div>
+        <div class="int-item"><div class="int-dot"></div>QuickBooks Online</div>
+        <div class="int-item"><div class="int-dot"></div>Stripe · live</div>
+        <div class="int-item"><div class="int-dot"></div>Plaid · 3 accounts</div>
+      </div>
+      <div class="user-row" onclick="goPage('settings')">
+        <div class="av">JD</div>
+        <div>
+          <strong>Jamie Dawson</strong>
+          <span>CFO · Series B</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div id="main">
+    <div id="topbar">
+      <div class="tb-left">
+        <div class="tb-title" id="tb-title">Overview</div>
+        <div class="tb-sub" id="tb-sub">Feb 19, 2026 · Synced 4 min ago · QBO + Stripe + Plaid</div>
+      </div>
+      <div class="tb-right">
+        <div class="live-pill"><div class="pulse"></div>Live data</div>
+        <button class="btn-ghost" id="btn-board" onclick="goPage('board')" style="display:none">Board View</button>
+        <button class="btn-ghost" onclick="exportData()">↓ Export</button>
+        <button class="btn-blue" onclick="toggleChat()">✦ Ask Evolv AI</button>
+      </div>
+    </div>
+
+    <!-- Alert bar -->
+    <div class="alert-bar warn" id="alert1">
+      <span class="alert-icon">⚠</span>
+      <div class="alert-text"><strong>Runway alert:</strong> At current $339K/mo burn, you have 7.7 months of cash. Series B close target is 6 weeks away — consider a bridge if round slips.</div>
+      <span class="alert-link" onclick="goPage('thirteen')">View 13-Week →</span>
+      <span class="alert-dismiss" onclick="this.parentElement.style.display='none'">✕</span>
+    </div>
+
+    <div id="body">
+
+      <!-- ══════ OVERVIEW ══════ -->
+      <div class="pg on" id="pg-overview">
+        <div class="krow">
+          <div class="kcard clickable" onclick="goPage('cashflow')">
+            <div class="klbl">
+              Cash on Hand
+              <div class="tip-wrap"><div class="tip-icon">?</div><div class="tip-box">Total liquid cash across all Plaid-linked bank accounts. Updated daily. Does not include credit lines or receivables.</div></div>
+            </div>
+            <div class="kval">$2.61M</div>
+            <div class="kfoot"><span class="chip up">+$140K</span><span class="knote">vs last week</span></div>
+          </div>
+          <div class="kcard clickable" onclick="goPage('expenses')">
+            <div class="klbl">
+              Monthly Burn
+              <div class="tip-wrap"><div class="tip-icon">?</div><div class="tip-box">Total cash outflows over the past 30 days, net of any refunds. Includes payroll, SaaS, infra, and all operating expenses from Plaid + QBO.</div></div>
+            </div>
+            <div class="kval">$339K</div>
+            <div class="kfoot"><span class="chip up">−$12K</span><span class="knote">vs last month</span></div>
+          </div>
+          <div class="kcard clickable" onclick="goPage('thirteen')">
+            <div class="klbl">
+              Runway
+              <div class="tip-wrap"><div class="tip-icon">?</div><div class="tip-box">Months of cash remaining at current burn rate. Calculated as: Cash on Hand ÷ Monthly Burn. Assumes flat burn — check 13-Week for trend-adjusted view.</div></div>
+            </div>
+            <div class="kval">7.7 mo</div>
+            <div class="kfoot"><span class="chip up">+0.4 mo</span><span class="knote">at current $339K burn</span></div>
+          </div>
+          <div class="kcard clickable" onclick="goPage('kpis')">
+            <div class="klbl">
+              LTV / CAC
+              <div class="tip-wrap"><div class="tip-icon">?</div><div class="tip-box">Lifetime Value divided by Customer Acquisition Cost. Benchmark: >3× is healthy for SaaS. Your LTV of $6,162 ÷ CAC of $1,620 = 3.8×.</div></div>
+            </div>
+            <div class="kval">3.8×</div>
+            <div class="kfoot"><span class="chip up">+0.3×</span><span class="knote">vs Q3 · benchmark 3×+</span></div>
+          </div>
+        </div>
+
+        <!-- Secondary KPIs for Series B CEO -->
+        <div class="krow">
+          <div class="kcard clickable" onclick="goPage('kpis')">
+            <div class="klbl">MRR</div>
+            <div class="kval" style="font-size:20px">$184K</div>
+            <div class="kfoot"><span class="chip up">+11%</span><span class="knote">MoM growth</span></div>
+          </div>
+          <div class="kcard clickable" onclick="goPage('kpis')">
+            <div class="klbl">ARR</div>
+            <div class="kval" style="font-size:20px">$2.21M</div>
+            <div class="kfoot"><span class="chip up">+14%</span><span class="knote">YoY run rate</span></div>
+          </div>
+          <div class="kcard clickable" onclick="goPage('kpis')">
+            <div class="klbl">
+              Net Dollar Retention
+              <div class="tip-wrap"><div class="tip-icon">?</div><div class="tip-box">Revenue retained from existing customers after expansion, downgrades, and churn. >100% = existing customers are growing faster than they leave. Benchmark: 110%+ for top-quartile SaaS.</div></div>
+            </div>
+            <div class="kval" style="font-size:20px">112%</div>
+            <div class="kfoot"><span class="chip up">+4%</span><span class="knote">vs Q3 · top-quartile</span></div>
+          </div>
+          <div class="kcard clickable" onclick="goPage('qbo')">
+            <div class="klbl">Gross Margin</div>
+            <div class="kval" style="font-size:20px">67%</div>
+            <div class="kfoot"><span class="chip up">+2%</span><span class="knote">vs prior quarter</span></div>
+          </div>
+        </div>
+
+        <div class="g2 mb10">
+          <div class="card">
+            <div class="card-head">
+              <div class="card-head-l">
+                <div class="ctitle">Cash Position · Feb 2026</div>
+                <div class="csub">Plaid bank balances · 6 data points</div>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <span class="chip up">+5.7% MTD</span>
+                <span class="clink" onclick="goPage('cashflow')">Detail →</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="cw" style="height:145px"><canvas id="c-cashpos"></canvas></div>
+            </div>
+            <div class="key-row">
+              <div class="key-item"><div class="key-dot" style="background:#0047ff"></div>Bank balance</div>
+              <div class="key-sep">·</div>
+              <div class="key-item" style="color:var(--b400)">Plaid-synced daily</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <div class="card-head-l">
+                <div class="ctitle">OpEx Breakdown · $339K</div>
+                <div class="csub">February 2026 · QBO categories</div>
+              </div>
+              <span class="clink" onclick="goPage('expenses')">Detail →</span>
+            </div>
+            <div class="card-body">
+              <div class="exlist" id="exBars-ov"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-head-l">
+              <div class="ctitle">13-Week Net Cash Flow</div>
+              <div class="csub">Nov 2025 – Feb 2026 · inflows minus outflows weekly</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <span class="chip up">11 / 13 positive</span>
+              <span class="clink" onclick="goPage('thirteen')">Full forecast →</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="cw" style="height:135px"><canvas id="c-net13"></canvas></div>
+          </div>
+          <div class="key-row">
+            <div class="key-item"><div class="key-dot" style="background:#0047ff"></div>Positive week</div>
+            <div class="key-item"><div class="key-dot" style="background:#dc2626"></div>Negative week</div>
+          </div>
+          <div class="sfoot">
+            <div class="sc"><div class="slbl">Total Inflows</div><div class="sval" style="color:var(--green)">$7.07M</div></div>
+            <div class="sc"><div class="slbl">Total Outflows</div><div class="sval" style="color:var(--red)">$5.38M</div></div>
+            <div class="sc"><div class="slbl">Net Cash Generated</div><div class="sval" style="color:var(--blue)">+$1.69M</div></div>
+            <div class="sc"><div class="slbl">Avg Weekly Net</div><div class="sval">+$130K</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ CASH FLOW ══════ -->
+      <div class="pg" id="pg-cashflow">
+        <div class="krow">
+          <div class="kcard">
+            <div class="klbl">Inflows (30d)
+              <div class="tip-wrap"><div class="tip-icon">?</div><div class="tip-box">Total cash received in the last 30 days. Includes Stripe payments, bank deposits, and other income from Plaid.</div></div>
+            </div>
+            <div class="kval" style="color:var(--green)">$548K</div>
+            <div class="kfoot"><span class="chip up">+8.2%</span><span class="knote">vs prior 30d ($507K)</span></div>
+          </div>
+          <div class="kcard">
+            <div class="klbl">Outflows (30d)
+              <div class="tip-wrap"><div class="tip-icon">?</div><div class="tip-box">Total cash paid out in the last 30 days. Includes all expense categories: payroll, SaaS, vendors from Plaid + QBO.</div></div>
+            </div>
+            <div class="kval" style="color:var(--red)">$339K</div>
+            <div class="kfoot"><span class="chip up">−3.4%</span><span class="knote">vs prior 30d ($351K)</span></div>
+          </div>
+          <div class="kcard">
+            <div class="klbl">Net Cash Flow (30d)</div>
+            <div class="kval">+$209K</div>
+            <div class="kfoot"><span class="chip up">+41%</span><span class="knote">vs prior 30d (+$156K)</span></div>
+          </div>
+          <div class="kcard">
+            <div class="klbl">Transactions</div>
+            <div class="kval">847</div>
+            <div class="kfoot"><span class="chip flat">+24</span><span class="knote">vs prior 30d (823)</span></div>
+          </div>
+        </div>
+        <div class="card mb10">
+          <div class="card-head">
+            <div class="card-head-l">
+              <div class="ctitle">Daily Cash Flow · February 2026</div>
+              <div class="csub">Inflows vs outflows, day-by-day from Plaid + Stripe</div>
+            </div>
+            <div class="tabs" id="cf-tabs">
+              <button class="tab on" onclick="setCF('both',this)">Both</button>
+              <button class="tab" onclick="setCF('in',this)">Inflow only</button>
+              <button class="tab" onclick="setCF('out',this)">Outflow only</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="cw" style="height:200px"><canvas id="c-daily"></canvas></div>
+          </div>
+          <div class="key-row">
+            <div class="key-item"><div class="key-dot" style="background:rgba(5,150,105,.7)"></div>Inflows (Stripe + Plaid)</div>
+            <div class="key-item"><div class="key-dot" style="background:rgba(220,38,38,.65)"></div>Outflows (all expenses)</div>
+            <div class="key-sep">·</div>
+            <div class="key-item" style="color:var(--b400)">Bars show daily totals in $K</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-head-l">
+              <div class="ctitle">Cumulative Net Cash · February</div>
+              <div class="csub">Running total of net cash flow since Feb 1</div>
+            </div>
+            <span class="chip up">+$209K month-to-date</span>
+          </div>
+          <div class="card-body"><div class="cw" style="height:130px"><canvas id="c-cum"></canvas></div></div>
+          <div class="key-row">
+            <div class="key-item"><div class="key-dot" style="background:#059669"></div>Cumulative net (inflows − outflows)</div>
+            <div class="key-sep">·</div>
+            <div class="key-item" style="color:var(--b400)">Rising line = cash generation</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ 13-WEEK ══════ -->
+      <div class="pg" id="pg-thirteen">
+        <div class="krow">
+          <div class="kcard">
+            <div class="klbl">Opening Cash (W1)</div>
+            <div class="kval">$920K</div>
+            <div class="kfoot"><span class="knote">13 weeks ago · Nov 4, 2025</span></div>
+          </div>
+          <div class="kcard">
+            <div class="klbl">Current Cash (W13)</div>
+            <div class="kval">$2.61M</div>
+            <div class="kfoot"><span class="chip up">+$1.69M</span><span class="knote">over 13 weeks</span></div>
+          </div>
+          <div class="kcard">
+            <div class="klbl">Best Week</div>
+            <div class="kval">+$290K</div>
+            <div class="kfoot"><span class="knote">Week 13 · Feb 17–21</span></div>
+          </div>
+          <div class="kcard">
+            <div class="klbl">Only Negative Week</div>
+            <div class="kval" style="color:var(--red)">−$20K</div>
+            <div class="kfoot"><span class="knote">Week 6 · Dec 9 · payroll surge</span></div>
+          </div>
+        </div>
+
+        <div class="card mb10">
+          <div class="card-head">
+            <div class="card-head-l">
+              <div class="ctitle">Weekly Cash Flow · 13 Weeks</div>
+              <div class="csub">Nov 4, 2025 – Feb 19, 2026 · each bar = one week net</div>
+            </div>
+            <div class="tabs" id="w13-tabs">
+              <button class="tab on" onclick="set13('net',this)">Net</button>
+              <button class="tab" onclick="set13('in',this)">Inflow</button>
+              <button class="tab" onclick="set13('out',this)">Outflow</button>
+              <button class="tab" onclick="set13('all',this)">All layers</button>
+            </div>
+          </div>
+          <div class="card-body"><div class="cw" style="height:220px"><canvas id="c-13wk"></canvas></div></div>
+          <div class="key-row">
+            <div class="key-item"><div class="key-dot" style="background:#0047ff"></div>Net positive week</div>
+            <div class="key-item"><div class="key-dot" style="background:#dc2626"></div>Net negative week</div>
+            <div class="key-sep">·</div>
+            <div class="key-item" style="color:var(--b400)">Height = magnitude in $K</div>
+          </div>
+          <div class="sfoot">
+            <div class="sc"><div class="slbl">Total Inflows</div><div class="sval" style="color:var(--green)">$7.07M</div></div>
+            <div class="sc"><div class="slbl">Total Outflows</div><div class="sval" style="color:var(--red)">$5.38M</div></div>
+            <div class="sc"><div class="slbl">Net 13-Week</div><div class="sval" style="color:var(--blue)">+$1.69M</div></div>
+            <div class="sc"><div class="slbl">Avg Weekly Net</div><div class="sval">+$130K</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div class="card-head-l">
+              <div class="ctitle">Cumulative Cash Position</div>
+              <div class="csub">Starting from $920K · each point = end-of-week balance</div>
+            </div>
+          </div>
+          <div class="card-body"><div class="cw" style="height:130px"><canvas id="c-13cum"></canvas></div></div>
+          <div class="key-row">
+            <div class="key-item"><div class="key-dot" style="background:#0047ff"></div>Cash on hand end-of-week</div>
+            <div class="key-sep">·</div>
+            <div class="key-item" style="color:var(--b400)">Filled area = cash position</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ EXPENSES ══════ -->
+      <div class="pg" id="pg-expenses">
+        <div class="krow">
+          <div class="kcard">
+            <div class="klbl">Total OpEx · Feb</div>
+            <div class="kval">$339K</div>
+            <div class="kfoot"><span class="chip up">−$12K</span><span class="knote">vs Jan ($351K)</span></div>
+          </div>
+          <div class="kcard">
+            <div class="klbl">Payroll (largest)</div>
+            <div class="kval">$182K</div>
+            <div class="kfoot"><span class="chip flat">53.7%</span><span class="knote">of OpEx · 22 employees</span></div>
+          </div>
+          <div class="kcard">
+            <div class="klbl">Recurring Fixed Costs</div>
+            <div class="kval">$218K</div>
+            <div class="kfoot"><span class="knote">64% of OpEx · predictable</span></div>
+          </div>
+          <div class="kcard">
+            <div class="klbl">Variable Costs</div>
+            <div class="kval">$121K</div>
+            <div class="kfoot"><span class="knote">36% of OpEx · discretionary</span></div>
+          </div>
+        </div>
+
+        <div class="g2 mb10">
+          <div class="card">
+            <div class="card-head">
+              <div class="card-head-l"><div class="ctitle">Category Breakdown</div><div class="csub">February 2026 · QBO categories</div></div>
+            </div>
+            <div class="card-body"><div class="cw" style="height:198px"><canvas id="c-donut"></canvas></div></div>
+            <div class="key-row">
+              <div class="key-item" style="color:var(--b400)">Click a segment to highlight · hover for amount + % share</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <div class="card-head-l"><div class="ctitle">Month-over-Month by Category</div><div class="csub">Sep 2025 – Feb 2026 · stacked</div></div>
+            </div>
+            <div class="card-body"><div class="cw" style="height:198px"><canvas id="c-extrend"></canvas></div></div>
+            <div class="key-row">
+              <div class="key-item"><div class="key-dot" style="background:#0047ff"></div>Payroll</div>
+              <div class="key-item"><div class="key-dot" style="background:#99c9ff"></div>SaaS</div>
+              <div class="key-item"><div class="key-dot" style="background:#e5e8ed"></div>Other</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mb10">
+          <div class="card-head">
+            <div class="card-head-l"><div class="ctitle">Category Detail · February 2026</div></div>
+          </div>
+          <div class="card-body" style="padding:14px 15px 4px">
+            <div class="exlist" id="exBars-full"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-head-l"><div class="ctitle">Recent Transactions</div><div class="csub">Latest 10 of 847 · QBO + Plaid</div></div>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>Date</th><th>Vendor</th><th>Category</th><th>Amount</th></tr></thead>
+            <tbody id="txns"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══════ KPIS ══════ -->
+      <div class="pg" id="pg-kpis">
+        <div class="mgrid">
+          <div class="mcard" onclick="goPage('qbo')">
+            <div class="mlbl">MRR
+              <div class="tip-wrap"><div class="tip-icon">?</div><div class="tip-box">Monthly Recurring Revenue: contracted subscription revenue you can reliably expect each month. Excludes one-time payments. From Stripe subscription data.</div></div>
+            </div>
+            <div class="mval">$184K</div>
+            <div class="mspark" id="sp-mrr"></div>
+            <div class="kfoot"><span class="chip up">+$18K</span><span class="knote">MoM · was $166K in Oct</span></div>
+            <div class="mbenchmark">12-month trend: <strong>+40% growth</strong> · $131K → $184K</div>
+          </div>
+          <div class="mcard" onclick="goPage('qbo')">
+            <div class="mlbl">ARR
+              <div class="tip-wrap"><div class="tip-icon">?</div><div class="tip-box">Annual Recurring Revenue = MRR × 12. Used for investor benchmarking and valuation multiples. At $2.21M ARR with 14% YoY growth.</div></div>
+            </div>
+            <div class="mval">$2.21M</div>
+            <div class="mspark" id="sp-arr"></div>
+            <div class="kfoot"><span class="chip up">+14%</span><span class="knote">YoY · from $1.94M</span></div>
+            <div class="mbenchmark">At 5× ARR multiple: <strong>~$11M valuation</strong></div>
+          </div>
+          <div class="mcard">
+            <div class="mlbl">LTV / CAC
+              <div class="tip-wrap"><div class="tip-icon">?</div><div class="tip-box">LTV ($6,162) divided by CAC ($1,620). Measures return on sales & marketing investment. >3× = healthy, >5× = exceptional. You're at 3.8× and improving.</div></div>
+            </div>
+            <div class="mval">3.8×</div>
+            <div class="mspark" id="sp-ltv"></div>
+            <div class="kfoot"><span class="chip up">+0.3×</span><span class="knote">vs Q3 2025</span></div>
+            <div class="mbenchmark">Benchmark: <strong>3× minimum</strong> · you're above</div>
+          </div>
+          <div class="mcard">
+            <div class="mlbl">CAC
+              <div class="tip-wrap"><div class="tip-icon">?</div><div class="tip-box">Customer Acquisition Cost = Sales & Marketing spend ÷ New customers acquired. Trailing 90-day calculation. Down $220 from $1,840 as efficiency improves.</div></div>
+            </div>
+            <div class="mval">$1,620</div>
+            <div class="mspark" id="sp-cac"></div>
+            <div class="kfoot"><span class="chip up">−$220</span><span class="knote">vs 90d ago ($1,840)</span></div>
+            <div class="mbenchmark">CAC payback: <strong>~9 months</strong> at current ACV</div>
+          </div>
+          <div class="mcard">
+            <div class="mlbl">Gross Churn
+              <div class="tip-wrap"><div class="tip-icon">?</div><div class="tip-box">% of MRR lost from cancellations in a given month. Does not account for expansion revenue. Your 1.8% churn = ~$3.3K MRR lost per month from cancellations.</div></div>
+            </div>
+            <div class="mval">1.8%</div>
+            <div class="mspark" id="sp-churn"></div>
+            <div class="kfoot"><span class="chip up">−0.3%</span><span class="knote">MoM trend</span></div>
+            <div class="mbenchmark">Benchmark: <strong>&lt;2% monthly</strong> · you're in range</div>
+          </div>
+          <div class="mcard">
+            <div class="mlbl">Net Dollar Retention
+              <div class="tip-wrap"><div class="tip-icon">?</div><div class="tip-box">Revenue from existing customers after expansion, contraction & churn. 112% means for every $1 of existing ARR, you retain $1.12 after 12 months — without any new customer acquisition. Top-quartile SaaS: 115%+.</div></div>
+            </div>
+            <div class="mval">112%</div>
+            <div class="mspark" id="sp-ndr"></div>
+            <div class="kfoot"><span class="chip up">+4%</span><span class="knote">vs Q3 · top-quartile threshold: 115%</span></div>
+            <div class="mbenchmark">Expansion MRR: <strong>+$3.1K/mo</strong> from upsells</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-head-l"><div class="ctitle">MRR Growth · Last 12 Months</div><div class="csub">Mar 2025 – Feb 2026 · Stripe subscription data</div></div>
+            <span class="chip up">+40% over 12 months</span>
+          </div>
+          <div class="card-body"><div class="cw" style="height:155px"><canvas id="c-mrr"></canvas></div></div>
+          <div class="key-row">
+            <div class="key-item"><div class="key-dot" style="background:#0047ff"></div>MRR ($K)</div>
+            <div class="key-item"><div class="key-dot" style="width:10px;height:2px;border-radius:0;background:#0047ff"></div>Trend line</div>
+            <div class="key-sep">·</div>
+            <div class="key-item" style="color:var(--b400)">Dots = month-end snapshot</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════ BOARD SUMMARY ══════ -->
+      <div class="pg" id="pg-board">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--b400);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px">Series B · Board Package</div>
+            <div style="font-size:18px;font-weight:800;color:var(--b900);letter-spacing:-.4px">February 2026 Update</div>
+          </div>
+          <button class="btn-ghost" onclick="window.print()">↓ Print / PDF</button>
+        </div>
+
+        <div class="insights">
+          <div class="insight-card">
+            <div class="ins-label">💰 Cash & Runway</div>
+            <div class="ins-val">$2.61M · 7.7 mo</div>
+            <div class="ins-desc">Cash improved $140K week-over-week. At $339K/mo burn, runway is 7.7 months — sufficient to reach Series B close target if timeline holds.</div>
+          </div>
+          <div class="insight-card">
+            <div class="ins-label">📈 Revenue Momentum</div>
+            <div class="ins-val">$2.21M ARR · +14%</div>
+            <div class="ins-desc">MRR grew from $131K to $184K over 12 months (+40%). NDR of 112% means existing customers are generating net new revenue without new sales.</div>
+          </div>
+          <div class="insight-card">
+            <div class="ins-label">⚡ Unit Economics</div>
+            <div class="ins-val">3.8× LTV:CAC</div>
+            <div class="ins-desc">CAC declined $220 (−12%) over 90 days while LTV held steady. Gross margin at 67% — strong foundation for scaled profitability.</div>
+          </div>
+        </div>
+
+        <div class="krow">
+          <div class="kcard"><div class="klbl">Cash on Hand</div><div class="kval">$2.61M</div><div class="kfoot"><span class="chip up">+$140K WoW</span></div></div>
+          <div class="kcard"><div class="klbl">Monthly Burn</div><div class="kval">$339K</div><div class="kfoot"><span class="chip up">−$12K MoM</span></div></div>
+          <div class="kcard"><div class="klbl">ARR</div><div class="kval">$2.21M</div><div class="kfoot"><span class="chip up">+14% YoY</span></div></div>
+          <div class="kcard"><div class="klbl">Gross Margin</div><div class="kval">67%</div><div class="kfoot"><span class="chip up">+2pp QoQ</span></div></div>
+        </div>
+
+        <div class="g2 mb10">
+          <div class="card">
+            <div class="card-head"><div class="ctitle">MRR Trajectory</div></div>
+            <div class="card-body"><div class="cw" style="height:160px"><canvas id="c-board-mrr"></canvas></div></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div class="ctitle">Burn vs Net Cash Flow</div></div>
+            <div class="card-body"><div class="cw" style="height:160px"><canvas id="c-board-burn"></canvas></div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div class="ctitle">Key Metrics Summary</div></div>
+          <table class="tbl">
+            <thead><tr><th>Metric</th><th>Current</th><th>Prior Period</th><th>Change</th><th>Benchmark</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td class="dk">Cash Runway</td><td class="num">7.7 mo</td><td class="num">7.3 mo</td><td><span class="chip up">+0.4 mo</span></td><td>12+ mo ideal</td><td><span class="chip flat">Watch</span></td></tr>
+              <tr><td class="dk">MRR Growth (MoM)</td><td class="num">+11%</td><td class="num">+9%</td><td><span class="chip up">+2pp</span></td><td>10%+ for Series B</td><td><span class="chip up">On track</span></td></tr>
+              <tr><td class="dk">Gross Margin</td><td class="num">67%</td><td class="num">65%</td><td><span class="chip up">+2pp</span></td><td>65%+ for SaaS</td><td><span class="chip up">Healthy</span></td></tr>
+              <tr><td class="dk">LTV / CAC</td><td class="num">3.8×</td><td class="num">3.5×</td><td><span class="chip up">+0.3×</span></td><td>3×+</td><td><span class="chip up">Strong</span></td></tr>
+              <tr><td class="dk">Net Dollar Retention</td><td class="num">112%</td><td class="num">108%</td><td><span class="chip up">+4pp</span></td><td>110%+ top quartile</td><td><span class="chip up">Strong</span></td></tr>
+              <tr><td class="dk">Monthly Burn</td><td class="num">$339K</td><td class="num">$351K</td><td><span class="chip up">−$12K</span></td><td>Declining</td><td><span class="chip up">Improving</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══════ QBO / P&L ══════ -->
+      <div class="pg" id="pg-qbo">
+        <div class="plrow">
+          <div class="plcard"><div class="pllbl">Revenue · Jan</div><div class="plval">$1.84M</div><div class="pldelta">↑ 11% YoY</div></div>
+          <div class="plcard"><div class="pllbl">COGS · Jan</div><div class="plval">$612K</div><div class="pldelta neu">33% of revenue</div></div>
+          <div class="plcard"><div class="pllbl">Gross Profit · Jan</div><div class="plval">$1.23M</div><div class="pldelta">67% GP margin</div></div>
+          <div class="plcard"><div class="pllbl">EBITDA · Jan</div><div class="plval">$384K</div><div class="pldelta">21% margin</div></div>
+        </div>
+        <div class="g2 mb10">
+          <div class="card">
+            <div class="card-head">
+              <div class="card-head-l"><div class="ctitle">Revenue · COGS · Gross Profit</div><div class="csub">Sep 2025 – Jan 2026 · QBO data</div></div>
+            </div>
+            <div class="card-body"><div class="cw" style="height:190px"><canvas id="c-pl"></canvas></div></div>
+            <div class="key-row">
+              <div class="key-item"><div class="key-dot" style="background:rgba(0,71,255,.8)"></div>Revenue</div>
+              <div class="key-item"><div class="key-dot" style="background:rgba(220,38,38,.6)"></div>COGS</div>
+              <div class="key-item"><div class="key-dot" style="background:rgba(5,150,105,.6)"></div>Gross Profit</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <div class="card-head-l"><div class="ctitle">12-Month Revenue Trend</div><div class="csub">Mar 2025 – Jan 2026 · monthly</div></div>
+            </div>
+            <div class="card-body"><div class="cw" style="height:190px"><canvas id="c-revtrend"></canvas></div></div>
+            <div class="key-row">
+              <div class="key-item"><div class="key-dot" style="background:#059669"></div>Monthly revenue ($K)</div>
+              <div class="key-sep">·</div>
+              <div class="key-item" style="color:var(--b400)">All from QBO</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="ctitle">Expense Detail by Category</div><div class="csub">January 2026 · Books closed</div></div>
+          <table class="tbl">
+            <thead><tr><th>Category</th><th>January</th><th>December</th><th>Change</th><th>% of OpEx</th><th>Trend</th></tr></thead>
+            <tbody>
+              <tr><td class="dk">Payroll & Benefits</td><td class="num">$182,400</td><td class="num">$177,200</td><td><span class="chip dn">+$5.2K</span></td><td class="num">53.8%</td><td><span class="knote">+3 new hires</span></td></tr>
+              <tr><td class="dk">SaaS & Tooling</td><td class="num">$67,100</td><td class="num">$71,500</td><td><span class="chip up">−$4.4K</span></td><td class="num">19.8%</td><td><span class="knote">2 licenses cancelled</span></td></tr>
+              <tr><td class="dk">Sales & Marketing</td><td class="num">$43,200</td><td class="num">$39,800</td><td><span class="chip dn">+$3.4K</span></td><td class="num">12.7%</td><td><span class="knote">Paid ads up</span></td></tr>
+              <tr><td class="dk">Infrastructure</td><td class="num">$28,300</td><td class="num">$26,100</td><td><span class="chip dn">+$2.2K</span></td><td class="num">8.3%</td><td><span class="knote">AWS usage growth</span></td></tr>
+              <tr><td class="dk">T&E</td><td class="num">$18,000</td><td class="num">$24,700</td><td><span class="chip up">−$6.7K</span></td><td class="num">5.3%</td><td><span class="knote">Fewer conferences</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══════ SETTINGS ══════ -->
+      <div class="pg" id="pg-settings">
+        <div class="g2">
+          <div class="card">
+            <div class="card-head"><div class="ctitle">Integrations</div><div class="csub">Last sync: 4 min ago</div></div>
+            <div class="setrow"><div><div class="sname">QuickBooks Online</div><div class="sdesc">P&L, expenses, chart of accounts · 847 transactions</div></div><span class="chip up">● Connected</span></div>
+            <div class="setrow"><div><div class="sname">Stripe</div><div class="sdesc">Subscriptions, charges, MRR · live webhooks active</div></div><span class="chip up">● Connected</span></div>
+            <div class="setrow"><div><div class="sname">Plaid</div><div class="sdesc">3 accounts linked · Chase Business, SVB, Brex</div></div><span class="chip up">● Connected</span></div>
+            <div class="setrow"><div><div class="sname">Add Integration</div><div class="sdesc">Gusto, Ramp, Expensify, NetSuite</div></div><button class="btn-ghost" style="font-size:11px">+ Connect</button></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div class="ctitle">Security & Access</div></div>
+            <div class="setrow"><div><div class="sname">MFA Enforcement</div><div class="sdesc">Google Authenticator required · all users</div></div><span class="chip up">Enabled</span></div>
+            <div class="setrow"><div><div class="sname">Token Encryption</div><div class="sdesc">AES-256-GCM at rest · no plaintext stored</div></div><span class="chip up">Active</span></div>
+            <div class="setrow"><div><div class="sname">Rate Limiting</div><div class="sdesc">100 req/min per IP · Upstash Redis</div></div><span class="chip up">Active</span></div>
+            <div class="setrow"><div><div class="sname">Audit Log</div><div class="sdesc">All actions logged · user, IP, timestamp</div></div><span class="chip up">Active</span></div>
+            <div class="setrow"><div><div class="sname">Cron Sync</div><div class="sdesc">QBO + Plaid every 4h · tokens refreshed 2am daily</div></div><span class="chip up">Running</span></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:10px">
+          <div class="card-head"><div class="ctitle">Team</div><div class="csub">2 active members</div></div>
+          <table class="tbl">
+            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Last Active</th><th>MFA</th></tr></thead>
+            <tbody>
+              <tr><td class="dk">Jamie Dawson</td><td>demo@evolv.ai</td><td><span class="tag">CFO · Admin</span></td><td>Now</td><td><span class="chip up">✓</span></td></tr>
+              <tr><td class="dk">Alex Chen</td><td>alex@yourcompany.com</td><td><span class="tag">Viewer</span></td><td>Feb 18</td><td><span class="chip up">✓</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /body -->
+  </div><!-- /main -->
+
+  <!-- CHAT -->
+  <aside id="chat">
+    <div class="chat-hd">
+      <div class="chat-brand">
+        <div class="chat-ico">✦</div>
+        <div>
+          <div class="chat-name">Evolv AI</div>
+          <div class="chat-desc">CFO co-pilot</div>
+        </div>
+      </div>
+      <button class="xbtn" onclick="toggleChat()">✕</button>
+    </div>
+    <div class="chat-ctx">
+      Live context: <strong>$2.61M cash</strong> · <strong>$339K/mo burn</strong> · <strong>7.7 mo runway</strong> · <strong>$2.21M ARR</strong> · Feb 19, 2026
+    </div>
+    <div id="msgs">
+      <div class="m ai">Hi Jamie! I can see your live financials — $2.61M cash, $339K burn, 7.7 months runway. Your Series B target is 6 weeks out. What would you like to dig into?</div>
+    </div>
+    <div class="sugs" id="sugs">
+      <button class="sug" onclick="askSug(this)">How's my runway vs Series B timeline?</button>
+      <button class="sug" onclick="askSug(this)">What's driving my burn this month?</button>
+      <button class="sug" onclick="askSug(this)">How are my SaaS unit economics?</button>
+      <button class="sug" onclick="askSug(this)">Am I on track to hit $3M ARR?</button>
+      <button class="sug" onclick="askSug(this)">What should I cut to extend runway 3 months?</button>
+    </div>
+    <div class="chat-ft">
+      <div class="inpwrap">
+        <input class="cinp" id="chatInp" placeholder="Ask about cash, burn, KPIs, forecasts…" onkeydown="if(event.key==='Enter')send()">
+        <button class="sendbtn" onclick="send()">↑</button>
+      </div>
+      <div class="chat-credit">Answers use live data · Powered by Claude</div>
+    </div>
+  </aside>
+</div><!-- /app -->
+
+<script>
+/* ══════════════════════════════════════════════════════
+   DATA — single source of truth
+══════════════════════════════════════════════════════ */
+const D = {
+  cash: 2610,            // $K
+  burn: 339,             // $K/mo
+  runway: 7.7,           // months
+  mrr: 184,              // $K
+  arr: 2210,             // $K
+  ltv: 6162,             // $
+  cac: 1620,             // $
+  ltvCac: 3.8,
+  churn: 1.8,            // %
+  ndr: 112,              // %
+  gm: 67,                // % gross margin
+  ebitda: 21,            // % margin
+  inflow30: 548,         // $K
+  outflow30: 339,        // $K
+  net30: 209,            // $K
+  txns30: 847,
+};
+
+const W13 = {
+  L:  ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12','W13'],
+  IN: [420,380,510,460,590,440,620,480,700,530,640,580,720],
+  OUT:[310,290,340,410,380,460,390,420,450,510,400,390,430],
+  get NET(){ return this.IN.map((v,i)=>v-this.OUT[i]); }
+};
+
+const DAILY = {
+  L:  Array.from({length:19},(_,i)=>`Feb ${i+1}`),
+  IN: [28,32,18,41,22,35,44,29,38,52,19,46,33,28,41,55,22,48,60],
+  OUT:[18,21,15,28,19,24,31,17,25,34,14,29,22,19,28,38,16,31,40]
+};
+
+const CASHPOS = { L:['Feb 1','Feb 5','Feb 8','Feb 12','Feb 15','Feb 19'], D:[2100,2280,2190,2450,2380,2610] };
+
+const MRR_12 = {
+  L:['Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb'],
+  D:[131,138,144,149,155,159,163,167,172,177,184,192]
+};
+
+const EXP = [
+  {n:'Payroll & Benefits', a:182.4, p:53.8, c:'#0047ff'},
+  {n:'SaaS & Tooling',     a:67.1,  p:19.8, c:'#338bff'},
+  {n:'Sales & Marketing',  a:43.2,  p:12.7, c:'#66aaff'},
+  {n:'Infrastructure',     a:28.3,  p: 8.3, c:'#99c9ff'},
+  {n:'T&E',                a:18.0,  p: 5.3, c:'#cce4ff'},
+];
+
+const TXNS = [
+  ['Feb 19','Rippling Payroll','Payroll','$91,200'],
+  ['Feb 18','AWS','Infrastructure','$14,300'],
+  ['Feb 17','Google Workspace','SaaS','$4,200'],
+  ['Feb 16','Salesforce','SaaS','$8,900'],
+  ['Feb 15','Facebook Ads','Marketing','$12,400'],
+  ['Feb 14','Figma','SaaS','$1,800'],
+  ['Feb 12','Rippling Payroll','Payroll','$91,200'],
+  ['Feb 10','Notion','SaaS','$960'],
+  ['Feb 8','Delta Airlines','T&E','$3,200'],
+  ['Feb 5','Google Cloud','Infrastructure','$14,000'],
+];
+
+/* ══════════════════════════════════════════════════════
+   CHART DEFAULTS
+══════════════════════════════════════════════════════ */
+Chart.defaults.font.family = "'IBM Plex Mono', monospace";
+Chart.defaults.font.size = 10;
+Chart.defaults.color = '#9aa2b2';
+
+const GRID = { color:'rgba(0,0,0,.04)', drawBorder:false };
+const TT = { backgroundColor:'#fff', borderColor:'#e5e8ed', borderWidth:1, titleColor:'#9aa2b2', bodyColor:'#111827', padding:10, cornerRadius:6 };
+
+const xAx = () => ({ grid:{display:false}, border:{display:false}, ticks:{padding:4} });
+const yAx = (cb) => ({ grid:GRID, border:{display:false}, ticks:{padding:4,callback:cb} });
+
+const CH = {};
+
+function commonOpts(stacked, yCb, extra={}) {
+  return {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:{...TT, ...extra} },
+    scales:{ x:{...xAx(),stacked:stacked||false}, y:{...yAx(yCb||undefined),stacked:stacked||false} }
+  };
+}
+
+function legOpts() {
+  return { display:true, labels:{ color:'#6b7280', usePointStyle:true, pointStyleWidth:7, boxHeight:5, padding:14, font:{size:11,family:"'Plus Jakarta Sans',sans-serif"} } };
+}
+
+/* ══════════════════════════════════════════════════════
+   BUILD CHARTS
+══════════════════════════════════════════════════════ */
+function buildCharts() {
+
+  // Cash Position
+  CH.cp = new Chart(id('c-cashpos'), {
+    type:'line',
+    data:{ labels:CASHPOS.L, datasets:[{ data:CASHPOS.D, borderColor:'#0047ff', borderWidth:2, pointRadius:3, pointBackgroundColor:'#0047ff', pointBorderColor:'#fff', pointBorderWidth:2, tension:.4, fill:true, backgroundColor:'rgba(0,71,255,.05)' }] },
+    options:{ ...commonOpts(false,v=>`$${v}K`), plugins:{ legend:{display:false}, tooltip:{...TT,callbacks:{label:c=>`$${c.raw.toLocaleString()}K`}} } }
+  });
+
+  // 13-week net overview
+  CH.n13 = new Chart(id('c-net13'), {
+    type:'bar',
+    data:{ labels:W13.L, datasets:[{ label:'Net', data:W13.NET, backgroundColor:W13.NET.map(v=>v>=0?'rgba(0,71,255,.75)':'rgba(220,38,38,.72)'), borderRadius:4, borderSkipped:false }] },
+    options:{ ...commonOpts(false,v=>`$${v}K`), plugins:{ legend:{display:false}, tooltip:{...TT,callbacks:{label:c=>`$${c.raw}K net`}} } }
+  });
+
+  // Daily CF
+  CH.daily = new Chart(id('c-daily'), {
+    type:'bar',
+    data:{ labels:DAILY.L, datasets:[
+      { label:'Inflow',  data:DAILY.IN,  backgroundColor:'rgba(5,150,105,.7)',  borderRadius:3, borderSkipped:false, barPercentage:.75 },
+      { label:'Outflow', data:DAILY.OUT, backgroundColor:'rgba(220,38,38,.65)', borderRadius:3, borderSkipped:false, barPercentage:.75 }
+    ]},
+    options:{ ...commonOpts(false,v=>`$${v}K`), plugins:{ legend:legOpts(), tooltip:{...TT,callbacks:{label:c=>`$${c.raw}K`}} } }
+  });
+
+  // Cumulative
+  let r=0; const cumD = DAILY.IN.map((v,i)=>{r+=v-DAILY.OUT[i];return r;});
+  CH.cum = new Chart(id('c-cum'), {
+    type:'line',
+    data:{ labels:DAILY.L, datasets:[{ data:cumD, borderColor:'#059669', borderWidth:2, pointRadius:0, tension:.4, fill:true, backgroundColor:'rgba(5,150,105,.05)' }] },
+    options:{ ...commonOpts(false,v=>`$${v}K`), plugins:{ legend:{display:false}, tooltip:{...TT,callbacks:{label:c=>`$${c.raw}K net`}} } }
+  });
+
+  // 13-week bars
+  CH.wk13 = new Chart(id('c-13wk'), {
+    type:'bar',
+    data:{ labels:W13.L, datasets:[{ label:'Net', data:W13.NET, backgroundColor:W13.NET.map(v=>v>=0?'rgba(0,71,255,.75)':'rgba(220,38,38,.72)'), borderRadius:5, borderSkipped:false }] },
+    options:{ ...commonOpts(false,v=>`$${v}K`), plugins:{ legend:{display:false}, tooltip:{...TT,callbacks:{label:c=>`$${c.raw}K`}} } }
+  });
+
+  // 13-week cumulative
+  let cc=920; const cd=W13.NET.map(v=>{cc+=v;return cc;});
+  CH.c13 = new Chart(id('c-13cum'), {
+    type:'line',
+    data:{ labels:W13.L, datasets:[{ data:cd, borderColor:'#0047ff', borderWidth:2, pointRadius:3, pointBackgroundColor:'#0047ff', pointBorderColor:'#fff', pointBorderWidth:2, tension:.4, fill:true, backgroundColor:'rgba(0,71,255,.05)' }] },
+    options:{ ...commonOpts(false,v=>`$${v}K`), plugins:{ legend:{display:false}, tooltip:{...TT,callbacks:{label:c=>`$${c.raw}K cash`}} } }
+  });
+
+  // Donut
+  CH.donut = new Chart(id('c-donut'), {
+    type:'doughnut',
+    data:{ labels:EXP.map(e=>e.n), datasets:[{ data:EXP.map(e=>e.a), backgroundColor:EXP.map(e=>e.c), borderColor:'#fff', borderWidth:3, hoverOffset:6 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'68%', plugins:{ legend:{position:'right',labels:{color:'#6b7280',usePointStyle:true,pointStyleWidth:7,boxHeight:7,padding:10,font:{size:11,family:"'Plus Jakarta Sans',sans-serif"}}}, tooltip:{...TT,callbacks:{label:c=>`$${EXP[c.dataIndex].a}K (${EXP[c.dataIndex].p}%)`}} } }
+  });
+
+  // Expense trend
+  CH.ext = new Chart(id('c-extrend'), {
+    type:'bar',
+    data:{ labels:['Sep','Oct','Nov','Dec','Jan','Feb'], datasets:[
+      { label:'Payroll', data:[175,176,177,177,182,184], backgroundColor:'#0047ff', borderRadius:3, borderSkipped:false },
+      { label:'SaaS',    data:[68,70,71,72,67,65],       backgroundColor:'#99c9ff', borderRadius:3, borderSkipped:false },
+      { label:'Other',   data:[82,80,81,79,90,90],       backgroundColor:'#e5e8ed', borderRadius:3, borderSkipped:false }
+    ]},
+    options:{ ...commonOpts(true,v=>`$${v}K`), plugins:{ legend:legOpts(), tooltip:{...TT,callbacks:{label:c=>`$${c.raw}K`}} } }
+  });
+
+  // MRR
+  CH.mrr = new Chart(id('c-mrr'), {
+    type:'line',
+    data:{ labels:MRR_12.L, datasets:[{ data:MRR_12.D, borderColor:'#0047ff', borderWidth:2, pointRadius:3.5, pointBackgroundColor:'#0047ff', pointBorderColor:'#fff', pointBorderWidth:2, tension:.3, fill:true, backgroundColor:'rgba(0,71,255,.05)' }] },
+    options:{ ...commonOpts(false,v=>`$${v}K`), plugins:{ legend:{display:false}, tooltip:{...TT,callbacks:{label:c=>`$${c.raw}K MRR`}} } }
+  });
+
+  // P&L grouped bar
+  CH.pl = new Chart(id('c-pl'), {
+    type:'bar',
+    data:{ labels:['Sep','Oct','Nov','Dec','Jan'], datasets:[
+      { label:'Revenue',      data:[1520,1640,1710,1790,1840], backgroundColor:'rgba(0,71,255,.8)',   borderRadius:4, borderSkipped:false },
+      { label:'COGS',         data:[510,545,570,595,612],      backgroundColor:'rgba(220,38,38,.6)',  borderRadius:4, borderSkipped:false },
+      { label:'Gross Profit', data:[1010,1095,1140,1195,1228], backgroundColor:'rgba(5,150,105,.6)',  borderRadius:4, borderSkipped:false }
+    ]},
+    options:{ ...commonOpts(false,v=>`$${v}K`), plugins:{ legend:legOpts(), tooltip:{...TT,callbacks:{label:c=>`$${c.raw}K`}} } }
+  });
+
+  // Revenue trend
+  CH.rev = new Chart(id('c-revtrend'), {
+    type:'line',
+    data:{ labels:['Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan'], datasets:[{ data:[1240,1310,1380,1460,1520,1580,1640,1710,1780,1840,1840], borderColor:'#059669', borderWidth:2, pointRadius:0, tension:.3, fill:true, backgroundColor:'rgba(5,150,105,.05)' }] },
+    options:{ ...commonOpts(false,v=>`$${v}K`), plugins:{ legend:{display:false}, tooltip:{...TT,callbacks:{label:c=>`$${c.raw}K`}} } }
+  });
+
+  // Board MRR
+  CH.bMrr = new Chart(id('c-board-mrr'), {
+    type:'line',
+    data:{ labels:MRR_12.L, datasets:[{ data:MRR_12.D, borderColor:'#0047ff', borderWidth:2, pointRadius:0, tension:.3, fill:true, backgroundColor:'rgba(0,71,255,.05)' }] },
+    options:{ ...commonOpts(false,v=>`$${v}K`), plugins:{ legend:{display:false}, tooltip:{...TT,callbacks:{label:c=>`$${c.raw}K`}} } }
+  });
+
+  // Board burn vs net
+  CH.bBurn = new Chart(id('c-board-burn'), {
+    type:'bar',
+    data:{ labels:['Sep','Oct','Nov','Dec','Jan','Feb'], datasets:[
+      { label:'Burn',     data:[361,355,350,355,351,339], backgroundColor:'rgba(220,38,38,.6)', borderRadius:4, borderSkipped:false },
+      { label:'Net Cash', data:[80,95,110,105,197,209],   backgroundColor:'rgba(5,150,105,.7)', borderRadius:4, borderSkipped:false }
+    ]},
+    options:{ ...commonOpts(false,v=>`$${v}K`), plugins:{ legend:legOpts(), tooltip:{...TT,callbacks:{label:c=>`$${c.raw}K`}} } }
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   UI ELEMENTS
+══════════════════════════════════════════════════════ */
+function buildExpBars(elId) {
+  const el = id(elId); if(!el) return;
+  el.innerHTML = EXP.map(e=>`
+    <div>
+      <div class="exmeta">
+        <span class="exname">${e.n}</span>
+        <span class="examt">$${e.a}K <span style="color:var(--b400);font-size:10px">${e.p}%</span></span>
+      </div>
+      <div class="barbg"><div class="barfg" style="width:${e.p}%;background:${e.c}"></div></div>
+    </div>`).join('');
+}
+
+function buildSparks() {
+  const sparkData = {
+    'sp-mrr':  [131,138,144,149,155,159,163,167,172,177,184],
+    'sp-arr':  [1572,1656,1728,1788,1860,1908,1956,2004,2064,2124,2208],
+    'sp-ltv':  [31,31,32,33,33,34,35,35,36,36,38],
+    'sp-cac':  [184,183,182,181,179,178,176,175,173,170,162],
+    'sp-churn':[24,23,22,22,21,21,20,20,19,19,18],
+    'sp-ndr':  [104,105,106,107,107,108,109,109,110,111,112],
+  };
+  for(const [elid, d] of Object.entries(sparkData)){
+    const el = id(elid); if(!el) continue;
+    const mn=Math.min(...d), mx=Math.max(...d);
+    el.innerHTML = d.map((v,i)=>{
+      const h = mx===mn ? 50 : Math.max(Math.round(((v-mn)/(mx-mn))*100), 6);
+      return `<div class="spb${i===d.length-1?' hi':''}" style="height:${h}%"></div>`;
+    }).join('');
+  }
+}
+
+function buildTxns() {
+  id('txns').innerHTML = TXNS.map(([d,v,c,a])=>`
+    <tr>
+      <td>${d}</td>
+      <td class="dk">${v}</td>
+      <td><span class="tag">${c}</span></td>
+      <td class="num">${a}</td>
+    </tr>`).join('');
+}
+
+/* ══════════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════════ */
+const META = {
+  overview: { title:'Overview',        sub:'Feb 19, 2026 · Synced 4 min ago · QBO + Stripe + Plaid', board:true },
+  cashflow: { title:'Cash Flow',       sub:'Daily inflows & outflows · Plaid + Stripe · Feb 2026', board:false },
+  thirteen: { title:'13-Week Forecast',sub:'Nov 4, 2025 – Feb 19, 2026 · rolling 13-week analysis', board:false },
+  expenses: { title:'Expenses',        sub:'QBO + Plaid · February 2026 · 847 transactions', board:false },
+  kpis:     { title:'SaaS KPIs',       sub:'Trailing 90 days · Stripe + QBO · updated daily', board:false },
+  board:    { title:'Board Summary',   sub:'Series B · February 2026 board package', board:false },
+  qbo:      { title:'P&L / QBO',       sub:'QuickBooks Online · January 2026 · books closed', board:true },
+  settings: { title:'Settings',        sub:'Integrations, security & team management', board:false },
+};
+
+function goPage(pg) {
+  document.querySelectorAll('.pg').forEach(el=>el.classList.remove('on'));
+  document.querySelectorAll('.nl').forEach(el=>el.classList.remove('on'));
+  id(`pg-${pg}`)?.classList.add('on');
+  document.querySelector(`.nl[data-page="${pg}"]`)?.classList.add('on');
+  const m = META[pg] || {};
+  id('tb-title').textContent = m.title || pg;
+  id('tb-sub').textContent   = m.sub || '';
+  id('btn-board').style.display = m.board ? '' : 'none';
+  id('body').scrollTop = 0;
+}
+
+document.querySelectorAll('.nl').forEach(el=>{
+  el.addEventListener('click', ()=> goPage(el.dataset.page));
+});
+
+/* ══════════════════════════════════════════════════════
+   CHART TABS
+══════════════════════════════════════════════════════ */
+function setCF(mode, btn) {
+  swapTabs('cf-tabs', btn);
+  CH.daily.data.datasets[0].hidden = mode==='out';
+  CH.daily.data.datasets[1].hidden = mode==='in';
+  CH.daily.update();
+}
+
+function set13(mode, btn) {
+  swapTabs('w13-tabs', btn);
+  CH.wk13.data.datasets = [];
+  if(mode==='net'||mode==='all') CH.wk13.data.datasets.push({ label:'Net', data:W13.NET, backgroundColor:W13.NET.map(v=>v>=0?'rgba(0,71,255,.75)':'rgba(220,38,38,.72)'), borderRadius:5, borderSkipped:false });
+  if(mode==='in' ||mode==='all') CH.wk13.data.datasets.push({ label:'Inflow',  data:W13.IN,  backgroundColor:'rgba(5,150,105,.7)',  borderRadius:5, borderSkipped:false });
+  if(mode==='out'||mode==='all') CH.wk13.data.datasets.push({ label:'Outflow', data:W13.OUT, backgroundColor:'rgba(220,38,38,.65)', borderRadius:5, borderSkipped:false });
+  CH.wk13.update();
+}
+
+function swapTabs(cId, btn) {
+  id(cId)?.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+/* ══════════════════════════════════════════════════════
+   LOGIN
+══════════════════════════════════════════════════════ */
+function doLogin() {
+  const email = id('l-email')?.value.trim().toLowerCase();
+  const pass  = id('l-pass')?.value;
+  const validEmails = ['demo@evolv.ai','jamie@yourcompany.com',''];
+  const validPass   = ['Demo1234','demo1234','password',''];
+  // accept demo creds or any non-empty combo for demo purposes
+  if(email && pass) {
+    id('login-screen').style.opacity = '0';
+    id('login-screen').style.transition = 'opacity .3s';
+    setTimeout(()=>{
+      id('login-screen').style.display = 'none';
+      id('app').classList.add('ready');
+    }, 300);
+  } else {
+    id('login-err').style.display = 'block';
+  }
+}
+
+// Allow Enter key in login form
+['l-email','l-pass'].forEach(fid=>{
+  id(fid)?.addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+});
+
+/* ══════════════════════════════════════════════════════
+   CHAT — with real numbers
+══════════════════════════════════════════════════════ */
+function toggleChat() { id('chat').classList.toggle('open'); }
+
+function exportData() { alert('In production: exports to CSV/PDF with live data.'); }
+
+// Keyword-matched AI responses using real D object values
+function getAIResponse(text) {
+  const t = text.toLowerCase();
+
+  if(t.match(/runway|series b|timeline|close|raise|round/)) return {
+    html: `Your current runway is <strong>${D.runway} months</strong> ($${D.cash.toLocaleString()}K ÷ $${D.burn}K/mo burn). Your Series B target is 6 weeks away.<br><br>
+    That means you'll have roughly <strong>${(D.runway - 1.5).toFixed(1)} months of runway remaining</strong> if the round closes on time. If it slips 2 months, you'd be at ~6.2 months — still above the 6-month "needs funding now" threshold, but tightening fast.<br><br>
+    <strong>Recommendation:</strong> If round slips past 8 weeks, consider a $500K–$1M bridge from existing angels. Your 112% NDR and 3.8× LTV:CAC make that a strong-position ask.`,
+    action: { label:'View 13-Week Forecast →', page:'thirteen' }
+  };
+
+  if(t.match(/burn|spend|expense|cost|overhead/)) return {
+    html: `Current monthly burn is <strong>$${D.burn}K</strong> — down $12K from last month's $351K.<br><br>
+    <strong>Breakdown:</strong><br>
+    • Payroll & Benefits: <strong>$182K (53.8%)</strong> — 22 employees<br>
+    • SaaS & Tooling: <strong>$67K (19.8%)</strong> — 2 licenses cancelled last month<br>
+    • Sales & Marketing: <strong>$43K (12.7%)</strong> — paid ads up $3.4K<br>
+    • Infrastructure: <strong>$28K (8.3%)</strong> — AWS usage growing with product<br>
+    • T&E: <strong>$18K (5.3%)</strong> — down $6.7K, fewer conferences<br><br>
+    The good news: your burn is declining while MRR is growing. Burn-to-ARR ratio: <strong>$${D.burn}K/$${(D.arr/12).toFixed(0)}K = 1.97× coverage</strong>.`,
+    action: { label:'View Expenses →', page:'expenses' }
+  };
+
+  if(t.match(/cac|ltv|unit econom|payback|acquire|acquisition/)) return {
+    html: `Your unit economics are solid and improving:<br><br>
+    • <strong>CAC: $${D.cac.toLocaleString()}</strong> (down from $1,840 — 90 days ago)<br>
+    • <strong>LTV: $${D.ltv.toLocaleString()}</strong> (average customer value over their lifetime)<br>
+    • <strong>LTV:CAC = ${D.ltvCac}×</strong> (benchmark is 3×+, you're above)<br>
+    • CAC payback: <strong>~9 months</strong> at current ACV<br><br>
+    The 12% CAC reduction while maintaining LTV is exactly what investors want to see at Series B. Marketing is becoming more efficient as you scale.`,
+    action: { label:'View SaaS KPIs →', page:'kpis' }
+  };
+
+  if(t.match(/mrr|arr|revenue|recurring|growth|3m arr|\$3m/)) return {
+    html: `Current financials:<br>
+    • MRR: <strong>$${D.mrr}K</strong> — up 11% MoM from $166K<br>
+    • ARR: <strong>$${(D.arr/1000).toFixed(2)}M</strong> — up 14% YoY<br>
+    • 12-month MRR growth: $131K → $184K = <strong>+40%</strong><br><br>
+    <strong>To hit $3M ARR:</strong> you need $250K/month MRR. At current 11% MoM growth: $184K × 1.11 × 1.11 × 1.11 ≈ <strong>$252K MRR in 3 months</strong> — so you're on track to hit $3M ARR by late May 2026 if growth holds.<br><br>
+    Key risk: churn at 1.8% means you need to add ~$3.3K MRR just to stay flat. Your NDR of 112% is handling this via expansion.`,
+    action: { label:'View SaaS KPIs →', page:'kpis' }
+  };
+
+  if(t.match(/churn|retain|ndr|net dollar|expansion|upsell/)) return {
+    html: `Retention metrics are strong:<br>
+    • <strong>Gross churn: 1.8%/month</strong> — down from 2.4% six months ago<br>
+    • <strong>NDR: 112%</strong> — meaning for every $100 of ARR at the start of a cohort, you have $112 remaining after 12 months (net of churn + expansion)<br>
+    • This means existing customers alone are generating <strong>+$3.1K MRR/month</strong> in expansion<br><br>
+    <strong>Translation:</strong> even if you signed zero new customers today, your ARR would still grow. That's the definition of a strong SaaS moat and will be a key Series B narrative.`,
+    action: { label:'View SaaS KPIs →', page:'kpis' }
+  };
+
+  if(t.match(/cut|extend|reduce|save|trim|efficient|optimize/)) return {
+    html: `To extend runway by 3 months, you'd need to reduce burn from <strong>$${D.burn}K → ~$${Math.round(D.burn * 0.75)}K/mo</strong> (−25%).<br><br>
+    <strong>Realistic levers:</strong><br>
+    • <strong>SaaS audit:</strong> $67K/mo — typically 20-30% savings possible = <strong>−$13-20K/mo</strong><br>
+    • <strong>Pause marketing:</strong> $43K/mo variable — risky but saves <strong>−$43K/mo</strong><br>
+    • <strong>T&E freeze:</strong> $18K → $8K = <strong>−$10K/mo</strong><br>
+    • <strong>Infrastructure optimisation:</strong> $28K → $20K = <strong>−$8K/mo</strong><br><br>
+    That's ~$31-51K/mo without touching headcount. At $290K burn instead of $339K, runway extends to <strong>${(D.cash / 290).toFixed(1)} months</strong> — gaining ~1.7 months.`,
+    action: { label:'View Expenses →', page:'expenses' }
+  };
+
+  if(t.match(/cash|balance|bank|position|hand/)) return {
+    html: `Cash position: <strong>$${D.cash.toLocaleString()}K ($2.61M)</strong> as of Feb 19, 2026.<br><br>
+    • Up $140K week-over-week<br>
+    • Up $209K month-to-date (net inflow $548K − outflow $339K)<br>
+    • 13-week trend: started at $920K, grew to $2.61M = <strong>+$1.69M generated</strong><br><br>
+    Accounts: Chase Business ($1.4M), SVB ($890K), Brex ($320K) — all synced via Plaid.`,
+    action: { label:'View Cash Flow →', page:'cashflow' }
+  };
+
+  if(t.match(/margin|profit|cogs|gross/)) return {
+    html: `Gross margin is <strong>${D.gm}%</strong> — up 2pp from last quarter.<br><br>
+    • Revenue: $1.84M<br>
+    • COGS: $612K (33%)<br>
+    • Gross Profit: $1.23M (67%)<br>
+    • EBITDA: $384K (<strong>${D.ebitda}% margin</strong>)<br><br>
+    67% gross margin is strong for a SaaS company at your stage (benchmark: 65%+). As you scale, COGS as a % of revenue should continue to decline, driving margin expansion toward 70-75%.`,
+    action: { label:'View P&L →', page:'qbo' }
+  };
+
+  // Default: context-aware fallback
+  const fallbacks = [
+    `Based on your live data: $${D.cash.toLocaleString()}K cash, $${D.burn}K/mo burn, ${D.runway} months runway. MRR is $${D.mrr}K (+11% MoM). What specifically would you like to analyze?`,
+    `Your burn rate of $${D.burn}K/mo vs $${D.inflow30}K inflows this month means you're generating $${D.net30}K net. At this pace, you're in a strong position heading into your Series B.`,
+    `Quick health check: LTV:CAC of ${D.ltvCac}× ✓ · NDR of ${D.ndr}% ✓ · Churn of ${D.churn}% ✓ · Gross margin ${D.gm}% ✓. The fundamentals are solid. What would you like to dig into?`,
+  ];
+  return { html: fallbacks[Math.floor(Math.random()*fallbacks.length)] };
+}
+
+let typEl = null, fbI = 0;
+
+function askSug(btn) {
+  id('sugs').style.display = 'none';
+  sendText(btn.textContent.trim());
+}
+
+function send() {
+  const el = id('chatInp');
+  const t = el.value.trim(); if(!t) return;
+  el.value = ''; sendText(t);
+}
+
+function sendText(text) {
+  const box = id('msgs');
+  appendMsg(box, 'usr', text);
+  typEl = document.createElement('div'); typEl.className='typing-ind';
+  typEl.innerHTML='<span></span><span></span><span></span>';
+  box.appendChild(typEl); scroll(box);
+
+  const delay = 900 + Math.random()*600;
+  setTimeout(()=>{
+    typEl?.remove(); typEl=null;
+    const resp = getAIResponse(text);
+    const d = document.createElement('div'); d.className='m ai';
+    d.innerHTML = resp.html;
+    if(resp.action) {
+      const a = document.createElement('div');
+      a.className='m-action';
+      a.textContent = resp.action.label;
+      a.onclick = ()=> goPage(resp.action.page);
+      d.appendChild(a);
+    }
+    box.appendChild(d); scroll(box);
+  }, delay);
+}
+
+function appendMsg(box, cls, html) {
+  const d = document.createElement('div'); d.className=`m ${cls}`;
+  if(cls==='ai') d.innerHTML=html; else d.textContent=html;
+  box.appendChild(d); scroll(box);
+}
+function scroll(el) { el.scrollTop = el.scrollHeight; }
+
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+function id(s) { return document.getElementById(s); }
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  buildCharts();
+  buildExpBars('exBars-ov');
+  buildExpBars('exBars-full');
+  buildSparks();
+  buildTxns();
+});
+</script>
+</body>
+</html>
