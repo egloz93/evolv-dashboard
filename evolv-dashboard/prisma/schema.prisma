@@ -1,0 +1,143 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  users       User[]
+  connections Integration[]
+  snapshots   CashSnapshot[]
+  transactions FinancialTransaction[]
+  kpis        KPIRecord[]
+}
+
+model User {
+  id             String       @id @default(cuid())
+  auth0Id        String       @unique
+  email          String       @unique
+  name           String?
+  role           UserRole     @default(VIEWER)
+  mfaEnabled     Boolean      @default(false)
+  onboarded      Boolean      @default(false)
+  orgId          String
+  organization   Organization @relation(fields: [orgId], references: [id])
+  createdAt      DateTime     @default(now())
+  auditLogs      AuditLog[]
+}
+
+enum UserRole {
+  ADMIN
+  CFO
+  ANALYST
+  VIEWER
+}
+
+model Integration {
+  id           String           @id @default(cuid())
+  provider     IntegrationProvider
+  accessToken  String           // encrypted at rest
+  refreshToken String?          // encrypted at rest
+  realmId      String?          // QBO realm
+  expiresAt    DateTime?
+  lastSyncAt   DateTime?
+  status       IntegrationStatus @default(ACTIVE)
+  orgId        String
+  organization Organization     @relation(fields: [orgId], references: [id])
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+enum IntegrationProvider {
+  QBO
+  STRIPE
+  PLAID
+}
+
+enum IntegrationStatus {
+  ACTIVE
+  INACTIVE
+  ERROR
+  NEEDS_REAUTH
+}
+
+model FinancialTransaction {
+  id          String      @id @default(cuid())
+  source      IntegrationProvider
+  externalId  String
+  type        String      // invoice, payment, expense, transfer
+  amount      Float
+  currency    String      @default("USD")
+  date        DateTime
+  description String?
+  category    String?
+  accountId   String?
+  orgId       String
+  organization Organization @relation(fields: [orgId], references: [id])
+  createdAt   DateTime    @default(now())
+
+  @@unique([source, externalId, orgId])
+  @@index([orgId, date])
+}
+
+model CashSnapshot {
+  id            String       @id @default(cuid())
+  date          DateTime
+  cashOnHand    Float
+  accountsReceivable Float?
+  accountsPayable    Float?
+  runway        Float?       // months
+  burnRate      Float?       // monthly
+  source        String       // plaid, qbo, manual
+  orgId         String
+  organization  Organization @relation(fields: [orgId], references: [id])
+  createdAt     DateTime     @default(now())
+
+  @@index([orgId, date])
+}
+
+model KPIRecord {
+  id          String       @id @default(cuid())
+  period      DateTime     // start of period (month)
+  ltv         Float?
+  cac         Float?
+  ltvCacRatio Float?
+  mrr         Float?
+  arr         Float?
+  churnRate   Float?
+  ndr         Float?       // net dollar retention
+  orgId       String
+  organization Organization @relation(fields: [orgId], references: [id])
+  createdAt   DateTime     @default(now())
+
+  @@unique([orgId, period])
+}
+
+model WeeklyForecast {
+  id        String   @id @default(cuid())
+  weekStart DateTime
+  projected Float
+  actual    Float?
+  orgId     String
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  resource  String?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+}
